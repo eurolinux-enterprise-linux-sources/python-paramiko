@@ -4,7 +4,7 @@
 
 Name:           python-paramiko
 Version:        1.7.5
-Release:        2.1%{?dist}
+Release:        4%{?dist}
 Summary:        A SSH2 protocol library for python
 
 Group:          Development/Libraries
@@ -13,6 +13,9 @@ License:        LGPLv2+
 URL:            http://www.lag.net/paramiko/
 Source0:        http://www.lag.net/paramiko/download/%{srcname}-%{version}.tar.gz
 Patch0: 	paramiko-channel-race.patch
+Patch1:         paramiko-CVE-2018-7750.patch
+Patch2:         paramiko-CVE-2018-7750-testfix.patch
+Patch3:         paramiko-CVE-2018-7750-testsfail.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:      noarch
@@ -24,6 +27,7 @@ BuildRequires: python-setuptools
 %endif
 
 Requires:       python-crypto >= 1.9
+BuildRequires:  python-crypto >= 1.9
 
 %description
 Paramiko (a combination of the esperanto words for "paranoid" and "friend") is
@@ -38,6 +42,9 @@ encrypted tunnel. (This is how sftp works, for example.)
 %prep
 %setup -q -n %{srcname}-%{version}
 %patch0 -p0 -b .race
+%patch1 -p1
+%patch2 -p1
+%patch3 -p1
 %{__chmod} a-x demos/*
 %{__sed} -i -e '/^#!/,1d' demos/* paramiko/rng*
 
@@ -48,6 +55,9 @@ CFLAGS="$RPM_OPT_FLAGS" %{__python} -c 'import setuptools; execfile("setup.py")'
 rm -rf $RPM_BUILD_ROOT
 %{__python} -c 'import setuptools; execfile("setup.py")' install --skip-build --root %{buildroot}
 
+%check
+%{__python} ./test.py --no-sftp --no-big-file
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -57,6 +67,17 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
+* Wed Apr  4 2018 Pavel Cahyna <pcahyna@redhat.com> - 1.7.5-4
+- Fix and enable tests (%%check).
+- Backport a change which makes tests exit with nonzero status when they fail.
+- Add a fix for upstream tests for CVE-2018-7750 (broken in previous).
+
+* Wed Apr  4 2018 Pavel Cahyna <pcahyna@redhat.com> - 1.7.5-3
+- Fix a security flaw (CVE-2018-7750) in Paramiko's server mode
+  (emphasis on **server** mode; this does **not** impact *client* use!)
+  Backported from 1.10: https://gist.github.com/stevebeattie/0eb190004e10ba0926ad8782f89676ad
+  Resolves #1557140
+
 * Fri Nov 13 2009 Dennis Gregorovic <dgregor@redhat.com> - 1.7.5-2.1
 - Fix conditional for RHEL
 
