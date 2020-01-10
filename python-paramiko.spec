@@ -4,7 +4,7 @@
 
 Name:           python-paramiko
 Version:        1.7.5
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        A SSH2 protocol library for python
 
 Group:          Development/Libraries
@@ -16,6 +16,10 @@ Patch0: 	paramiko-channel-race.patch
 Patch1:         paramiko-CVE-2018-7750.patch
 Patch2:         paramiko-CVE-2018-7750-testfix.patch
 Patch3:         paramiko-CVE-2018-7750-testsfail.patch
+# Fix for CVE-2018-1000805
+# Upstream issue: https://github.com/paramiko/paramiko/issues/1283
+# Upstream fix: https://github.com/paramiko/paramiko/commit/56c96a65
+Patch4:         paramiko-CVE-2018-1000805.patch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildArch:      noarch
@@ -45,6 +49,7 @@ encrypted tunnel. (This is how sftp works, for example.)
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 %{__chmod} a-x demos/*
 %{__sed} -i -e '/^#!/,1d' demos/* paramiko/rng*
 
@@ -67,6 +72,11 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/*
 
 %changelog
+* Fri Oct 12 2018 Marcel Plch <mplch@redhat.com> - 1.7.5-5
+- Split handler tables for server and client side
+- Fix CVE-2018-1000805
+- Resolves: rhbz#1637365
+
 * Wed Apr  4 2018 Pavel Cahyna <pcahyna@redhat.com> - 1.7.5-4
 - Fix and enable tests (%%check).
 - Backport a change which makes tests exit with nonzero status when they fail.
