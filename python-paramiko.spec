@@ -10,7 +10,7 @@
 
 Name:          python-%{srcname}
 Version:       2.1.1
-Release:       5%{?dist}
+Release:       9%{?dist}
 Provides:       python2-paramiko = %{version}-%{release}
 Summary:       SSH2 protocol library for python
 
@@ -20,6 +20,7 @@ URL:           https://github.com/paramiko/paramiko
 Source0:       %{url}/archive/%{version}/%{srcname}-%{version}.tar.gz
 
 Patch0:        CVE-2018-7750.diff
+Patch1:	       CVE-2018-1000805.diff
 
 BuildArch:     noarch
 
@@ -120,6 +121,12 @@ rm -f html/.buildinfo
 %doc html/ demos/
 
 %changelog
+* Thu Oct 18 2018 Jake Hunsaker <jhunsake@redhat.com> - 2.1.1-9
+- Fix a security flaw (CVE-2018-1000805) in Paramiko's server
+  mode (does not effect client mode).
+  Backported from 2.1.6
+  Resolves rhbz#1637366
+
 * Fri Jul 20 2018 Jake Hunsaker <jhunsake@redhat.com> - 2.1.1-5
 - Rebuild for move from Extras to Base for 7.6
 
